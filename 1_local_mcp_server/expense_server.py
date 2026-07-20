@@ -3,7 +3,9 @@ from fastmcp import FastMCP
 import os
 import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "expenses.db")
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
+DB_PATH = os.path.join(ROOT_DIR, "expenses.db")
+CATEGORIES_PATH = os.path.join(ROOT_DIR, "data/categories.json")
 mcp = FastMCP(name="Demo Server")
 
 def init_db():
@@ -70,6 +72,11 @@ def summarize(start_date, end_date, category=None):
         cur = c.execute(query, params)
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]
+    
+@mcp.resource("expense://categories", mime_type="application/json")
+def categories():
+    with open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
+        return f.read()
 
 if __name__ == "__main__":
     mcp.run()
